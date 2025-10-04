@@ -1,0 +1,32 @@
+name: APK
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: gradle/actions/setup-gradle@v3
+
+      # اختیاری: اگر HS_URL را به Settings→Variables بدهی، اپ به سرور تو وصل می‌شود
+      - name: (optional) Set default homeserver
+        env:
+          HS_URL: ${{ vars.HS_URL }}
+        run: |
+          mkdir -p vector-app/src/main/assets
+          echo "{ \"defaultHomeserverUrl\": \"${HS_URL:-https://matrix-client.matrix.org}\" }" > vector-app/src/main/assets/vector_config.json
+          cat vector-app/src/main/assets/vector_config.json
+
+      - name: Build APK (GPlay Debug)
+        run: ./gradlew :vector-app:a
