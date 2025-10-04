@@ -1,9 +1,7 @@
 name: Move labelled issues to correct boards and columns
 
 on:
-  issues:
-    types: [labeled]
-
+  workflow_dispatch:
 jobs:
   apply_Z-Labs_label:
     name: Add Z-Labs label for features behind labs flags

@@ -3,6 +3,10 @@
     <!-- The https://github.com/LikeTheSalad/android-stem requires a non empty strings.xml -->
     <string name="ignored_placeholder" tools:ignore="UnusedResources">ignored</string>
 
+    <string name="app_name">Andishe-chat</string>
+    <string name="default_hs_url">https://edu97.ir</string>
+    <string name="default_is_url"></string>
+
     <string name="restriction_default_homeserver_url_title">Default homeserver URL</string>
     <string name="restriction_default_push_gateway_title">Default Push gateway</string>
     <string name="restriction_permalink_base_url_title">Permalink base url</string>

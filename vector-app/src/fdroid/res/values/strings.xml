@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Andishe-chat</string>
+    <string name="default_hs_url">https://edu97.ir</string>
+    <string name="default_is_url"></string>
+</resources>

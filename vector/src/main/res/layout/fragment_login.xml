@@ -119,6 +119,16 @@
 
             </FrameLayout>
 
+            <TextView
+                android:id="@+id/andishe_tagline"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:text="دبستان اندیشه حسینی  مدرسه پیشرو در تکنولوژی آموزشی"
+                android:textAlignment="center"
+                android:textSize="14sp" />
+
             <!-- Social Logins buttons -->
             <LinearLayout
                 android:id="@+id/loginSocialLoginContainer"

@@ -1,9 +1,6 @@
 name: "Validate Gradle Wrapper"
 on:
-  pull_request: { }
-  push:
-    branches: [ main, develop ]
-
+  workflow_dispatch:
 jobs:
   validation:
     name: "Validation"

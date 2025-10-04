@@ -1,9 +1,7 @@
 name: Move P1 bugs to boards
 
 on:
-  issues:
-    types: [labeled, unlabeled]
-
+  workflow_dispatch:
 jobs:
   p1_issues_to_team_workboard:
     runs-on: ubuntu-latest

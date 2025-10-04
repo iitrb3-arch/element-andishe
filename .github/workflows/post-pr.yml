@@ -4,10 +4,7 @@ name: Integration Tests
 # Further filtering occurs in 'should-i-run'
 
 on:
-  pull_request:
-    types: [closed]
-    branches: [develop]
-
+  workflow_dispatch:
 # Enrich gradle.properties for CI/CD
 env:
   GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx3072m -Dfile.encoding=UTF-8 -XX:+HeapDumpOnOutOfMemoryError" -Dkotlin.daemon.jvm.options="-Xmx2560m" -Dkotlin.incremental=false

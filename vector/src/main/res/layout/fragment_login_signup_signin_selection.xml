@@ -63,10 +63,12 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="38dp"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/loginSignupSigninText"
-                tools:text="@string/login_signup" />
+                tools:text="@string/login_signup"
+                tools:visibility="visible" />
 
             <!-- Sign in or gone -->
             <Button
@@ -74,13 +76,13 @@
                 style="@style/Widget.Vector.Button.Outlined.Login"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
+                android:layout_marginTop="38dp"
                 android:text="@string/login_signin"
                 android:visibility="gone"
                 app:layout_constraintBottom_toTopOf="@id/loginSignupSigninSignInSocialLoginContainer"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/loginSignupSigninSubmit"
+                app:layout_constraintTop_toBottomOf="@id/loginSignupSigninText"
                 tools:visibility="visible" />
 
             <!-- Social Login buttons -->

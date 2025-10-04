@@ -1,9 +1,7 @@
 name: Documentation
 
 on:
-  push:
-    branches: [ develop ]
-
+  workflow_dispatch:
 jobs:
   docs:
     name: Generate and publish Android Matrix SDK documentation
