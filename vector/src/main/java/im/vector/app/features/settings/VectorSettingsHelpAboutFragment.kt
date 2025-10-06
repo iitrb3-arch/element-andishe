@@ -14,10 +14,8 @@ import im.vector.app.R
 import im.vector.app.core.extensions.orEmpty
 import im.vector.app.core.preference.VectorPreference
 import im.vector.app.core.resources.BuildMeta
-import im.vector.app.core.utils.FirstThrottler
 import im.vector.app.core.utils.copyToClipboard
 import im.vector.app.core.utils.openAppSettingsPage
-import im.vector.app.core.utils.openUrlInChromeCustomTab
 import im.vector.app.features.analytics.plan.MobileScreen
 import im.vector.app.features.version.VersionProvider
 import im.vector.lib.strings.CommonStrings
@@ -34,8 +32,6 @@ class VectorSettingsHelpAboutFragment :
     override var titleRes = CommonStrings.preference_root_help_about
     override val preferenceXmlRes = R.xml.vector_settings_help_about
 
-    private val firstThrottler = FirstThrottler(1000)
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         analyticsScreenName = MobileScreen.ScreenName.SettingsHelp
@@ -43,12 +39,11 @@ class VectorSettingsHelpAboutFragment :
 
     override fun bindPref() {
         // Help
-        findPreference<VectorPreference>(VectorPreferences.SETTINGS_HELP_PREFERENCE_KEY)!!
-                .onPreferenceClickListener = Preference.OnPreferenceClickListener {
-            if (firstThrottler.canHandle() is FirstThrottler.CanHandlerResult.Yes) {
-                openUrlInChromeCustomTab(requireContext(), null, VectorSettingsUrls.HELP)
-            }
-            false
+        findPreference<VectorPreference>(VectorPreferences.SETTINGS_HELP_PREFERENCE_KEY)?.apply {
+            title = getString(R.string.andishe_help_title)
+            summary = getString(R.string.andishe_help_summary)
+            isSelectable = false
+            onPreferenceClickListener = Preference.OnPreferenceClickListener { false }
         }
 
         // preference to start the App info screen, to facilitate App permissions access

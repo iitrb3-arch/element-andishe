@@ -23,14 +23,12 @@ import dagger.hilt.android.AndroidEntryPoint
 import im.vector.app.R
 import im.vector.app.core.extensions.hideKeyboard
 import im.vector.app.core.extensions.hidePassword
-import im.vector.app.core.extensions.toReducedUrl
 import im.vector.app.databinding.FragmentLoginBinding
 import im.vector.lib.strings.CommonStrings
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import org.matrix.android.sdk.api.auth.SSOAction
 import org.matrix.android.sdk.api.failure.Failure
 import org.matrix.android.sdk.api.failure.MatrixError
 import org.matrix.android.sdk.api.failure.isInvalidPassword
@@ -62,7 +60,7 @@ class LoginFragment :
         super.onViewCreated(view, savedInstanceState)
 
         setupSubmitButton()
-        setupForgottenPasswordButton()
+        views.forgetPasswordButton.visibility = View.GONE
 
         views.passwordField.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
@@ -146,14 +144,8 @@ class LoginFragment :
     }
 
     private fun setupUi(state: LoginViewState) {
-        views.loginFieldTil.hint = getString(
-                when (state.signMode) {
-                    SignMode.Unknown -> error("developer error")
-                    SignMode.SignUp -> CommonStrings.login_signup_username_hint
-                    SignMode.SignIn -> CommonStrings.login_signin_username_hint
-                    SignMode.SignInWithMatrixId -> CommonStrings.login_signin_matrix_id_hint
-                }
-        )
+        views.loginFieldTil.hint = getString(R.string.andishe_login_username_hint)
+        views.passwordFieldTil.hint = getString(R.string.andishe_login_password_hint)
 
         // Handle direct signin first
         if (state.signMode == SignMode.SignInWithMatrixId) {
@@ -162,64 +154,18 @@ class LoginFragment :
             views.loginNotice.text = getString(CommonStrings.login_signin_matrix_id_notice)
             views.loginPasswordNotice.isVisible = true
         } else {
-            val resId = when (state.signMode) {
-                SignMode.Unknown -> error("developer error")
-                SignMode.SignUp -> CommonStrings.login_signup_to
-                SignMode.SignIn -> CommonStrings.login_connect_to
-                SignMode.SignInWithMatrixId -> CommonStrings.login_connect_to
-            }
-
-            when (state.serverType) {
-                ServerType.MatrixOrg -> {
-                    views.loginServerIcon.isVisible = true
-                    views.loginServerIcon.setImageResource(R.drawable.ic_logo_matrix_org)
-                    views.loginTitle.text = getString(resId, state.homeServerUrlFromUser.toReducedUrl())
-                    views.loginNotice.text = getString(CommonStrings.login_server_matrix_org_text)
-                }
-                ServerType.EMS -> {
-                    views.loginServerIcon.isVisible = true
-                    views.loginServerIcon.setImageResource(R.drawable.ic_logo_element_matrix_services)
-                    views.loginTitle.text = getString(resId, "Element Matrix Services")
-                    views.loginNotice.text = getString(CommonStrings.login_server_modular_text)
-                }
-                ServerType.Other -> {
-                    views.loginServerIcon.isVisible = false
-                    views.loginTitle.text = getString(resId, state.homeServerUrlFromUser.toReducedUrl())
-                    views.loginNotice.text = getString(CommonStrings.login_server_other_text)
-                }
-                ServerType.Unknown -> Unit /* Should not happen */
-            }
+            views.loginServerIcon.isVisible = false
+            views.loginTitle.text = getString(R.string.andishe_login_title)
+            views.loginNotice.text = getString(R.string.andishe_login_notice)
             views.loginPasswordNotice.isVisible = false
-
-            if (state.loginMode is LoginMode.SsoAndPassword) {
-                views.loginSocialLoginContainer.isVisible = true
-                views.loginSocialLoginButtons.render(state.loginMode, ssoMode(state)) { provider ->
-                    loginViewModel.getSsoUrl(
-                            redirectUrl = SSORedirectRouterActivity.VECTOR_REDIRECT_URL,
-                            deviceId = state.deviceId,
-                            providerId = provider?.id,
-                            action = if (state.signMode == SignMode.SignUp) SSOAction.REGISTER else SSOAction.LOGIN
-                    )
-                            ?.let { openInCustomTab(it) }
-                }
-            } else {
-                views.loginSocialLoginContainer.isVisible = false
-                views.loginSocialLoginButtons.ssoIdentityProviders = null
-            }
+            views.loginSocialLoginContainer.isVisible = false
+            views.loginSocialLoginButtons.ssoIdentityProviders = null
         }
     }
 
     private fun setupButtons(state: LoginViewState) {
-        views.forgetPasswordButton.isVisible = state.signMode == SignMode.SignIn
-
-        views.loginSubmit.text = getString(
-                when (state.signMode) {
-                    SignMode.Unknown -> error("developer error")
-                    SignMode.SignUp -> CommonStrings.login_signup_submit
-                    SignMode.SignIn,
-                    SignMode.SignInWithMatrixId -> CommonStrings.login_signin
-                }
-        )
+        views.forgetPasswordButton.isVisible = false
+        views.loginSubmit.text = getString(R.string.andishe_login_button)
     }
 
     private fun setupSubmitButton() {

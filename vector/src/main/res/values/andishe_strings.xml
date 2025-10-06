@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="preference_root_help_about">درباره دبستان اندیشه حسینی</string>
+    <string name="preference_help">درباره</string>
+    <string name="preference_help_title">دبستان اندیشه حسینی</string>
+    <string name="preference_help_summary">طراح و برنامه‌نویس: فرهاد صناعی</string>
+    <string name="preference_versions">اطلاعات نسخه</string>
+    <string name="preference_system_settings">تنظیمات سیستم</string>
+    <string name="settings_app_info_link_title">تنظیمات برنامه</string>
+    <string name="settings_app_info_link_summary">باز کردن تنظیمات برنامه در سیستم</string>
+    <string name="settings_version">نسخه andishe2</string>
+    <string name="settings_sdk_version">نسخه SDK</string>
+    <string name="settings_crypto_version">نسخه رمزنگاری</string>
+    <string name="andishe_help_title">دبستان اندیشه حسینی</string>
+    <string name="andishe_help_summary">طراح و برنامه‌نویس: فرهاد صناعی</string>
+    <string name="andishe_login_title">ورود به دبستان اندیشه حسینی</string>
+    <string name="andishe_login_notice">لطفاً نام کاربری و رمز عبور خود را وارد کنید.</string>
+    <string name="andishe_login_username_hint">نام کاربری</string>
+    <string name="andishe_login_password_hint">رمز عبور</string>
+    <string name="andishe_login_button">ورود</string>
+</resources>
