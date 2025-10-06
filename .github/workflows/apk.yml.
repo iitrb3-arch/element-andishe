@@ -1,15 +1,11 @@
-name: Build Release APK (Fdroid arm64)
+name: Build Android APK (Fdroid arm64)
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - develop
       - main
-
-concurrency:
-  group: apk-${{ github.ref }}
-  cancel-in-progress: true
+      - develop
 
 env:
   HS_URL: https://edu97.ir
@@ -27,25 +23,22 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
-
-      - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@v2
-
-      - name: Set Gradle version
-        run: |
-          sed -i 's|distributionUrl=.*|distributionUrl=https\://services.gradle.org/distributions/gradle-8.6-bin.zip|' gradle/wrapper/gradle-wrapper.properties
-
-      - name: Configure homeserver URL
-        run: |
-          mkdir -p vector-app/src/main/assets
-          echo '{ "defaultHomeserverUrl": "${{ env.HS_URL }}" }' > vector-app/src/main/assets/vector_config.json
+          java-version: 17
 
       - name: Make Gradle executable
         run: chmod +x ./gradlew
 
-      - name: Build optimized release APK
-        run: ./gradlew clean :vector-app:assembleFdroidRelease -PminifyEnabled=true -PshrinkResources=true --no-daemon --stacktrace
+      - name: Configure homeserver
+        run: |
+          mkdir -p vector-app/src/main/assets
+          echo '{ "defaultHomeserverUrl": "${{ env.HS_URL }}" }' > vector-app/src/main/assets/vector_config.json
+
+      - name: Build release APK (optimized)
+        run: |
+          ./gradlew clean :vector-app:assembleFdroidRelease \
+            -PminifyEnabled=true \
+            -PshrinkResources=true \
+            --no-daemon --stacktrace
 
       - name: List built APKs
         run: ls -lh vector-app/build/outputs/apk/**/release/
@@ -53,6 +46,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: elementx-fdroid-release
-          path: |
-            vector-app/build/outputs/apk/**/release/*.apk
+          name: fdroid-release
+          path: vector-app/build/outputs/apk/**/release/*.apk
