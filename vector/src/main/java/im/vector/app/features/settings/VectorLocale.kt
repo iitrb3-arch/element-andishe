@@ -17,7 +17,6 @@ import im.vector.lib.strings.CommonStrings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import java.util.IllformedLocaleException
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -40,7 +39,7 @@ class VectorLocale @Inject constructor(
         private const val ISO_15924_LATN = "Latn"
     }
 
-    private val defaultLocale = Locale("en", "US")
+    private val defaultLocale = Locale("fa")
 
     /**
      * The cache of supported application languages.
@@ -64,14 +63,7 @@ class VectorLocale @Inject constructor(
                     preferences.getString(APPLICATION_LOCALE_VARIANT_KEY, "")!!
             )
         } else {
-            applicationLocale = Locale.getDefault()
-
-            // detect if the default language is used
-            val defaultStringValue = getString(context, defaultLocale, CommonStrings.resources_country_code)
-            if (defaultStringValue == getString(context, applicationLocale, CommonStrings.resources_country_code)) {
-                applicationLocale = defaultLocale
-            }
-
+            applicationLocale = defaultLocale
             saveApplicationLocale(applicationLocale)
         }
     }
@@ -137,48 +129,10 @@ class VectorLocale @Inject constructor(
      * Init the supported application locales list.
      */
     private fun initApplicationLocales() {
-        val knownLocalesSet = HashSet<Triple<String, String, String>>()
-
-        try {
-            val availableLocales = Locale.getAvailableLocales()
-
-            for (locale in availableLocales) {
-                knownLocalesSet.add(
-                        Triple(
-                                getString(context, locale, CommonStrings.resources_language),
-                                getString(context, locale, CommonStrings.resources_country_code),
-                                getString(context, locale, CommonStrings.resources_script)
-                        )
-                )
-            }
-        } catch (e: Exception) {
-            Timber.e(e, "## getApplicationLocales() : failed")
-            knownLocalesSet.add(
-                    Triple(
-                            context.getString(CommonStrings.resources_language),
-                            context.getString(CommonStrings.resources_country_code),
-                            context.getString(CommonStrings.resources_script)
-                    )
-            )
-        }
-
-        val list = knownLocalesSet.mapNotNull { (language, country, script) ->
-            try {
-                Locale.Builder()
-                        .setLanguage(language)
-                        .setRegion(country)
-                        .setScript(script)
-                        .build()
-            } catch (exception: IllformedLocaleException) {
-                if (buildMeta.isDebug) {
-                    throw exception
-                }
-                // Ignore this locale in production
-                null
-            }
-        }
-                // sort by human display names
-                .sortedBy { localeToLocalisedString(it).lowercase(it) }
+        val list = listOf(
+                Locale("fa"),
+                Locale("en", "US")
+        )
 
         supportedLocales.clear()
         supportedLocales.addAll(list)

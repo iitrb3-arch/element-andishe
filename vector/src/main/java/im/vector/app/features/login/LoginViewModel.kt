@@ -131,19 +131,14 @@ class LoginViewModel @AssistedInject constructor(
             loginConfig = null
         }
 
-        val configUrl = loginConfig?.homeServerUrl?.takeIf { it.isNotEmpty() }
-        if (configUrl != null) {
-            // Use config from uri
-            val homeServerConnectionConfig = homeServerConnectionConfigFactory.create(configUrl)
-            if (homeServerConnectionConfig == null) {
-                // Url is invalid, in this case, just use the regular flow
-                Timber.w("Url from config url was invalid: $configUrl")
-                _viewEvents.post(LoginViewEvents.OpenServerSelection)
-            } else {
-                getLoginFlow(homeServerConnectionConfig, ServerType.Other)
-            }
+        val targetUrl = (loginConfig?.homeServerUrl?.takeIf { it.isNotEmpty() }
+                ?: matrixOrgUrl).ensureTrailingSlash()
+        val homeServerConnectionConfig = homeServerConnectionConfigFactory.create(targetUrl)
+        if (homeServerConnectionConfig == null) {
+            Timber.w("Url from config url was invalid: $targetUrl")
+            _viewEvents.post(LoginViewEvents.Failure(Throwable("Unable to create a HomeServerConnectionConfig")))
         } else {
-            _viewEvents.post(LoginViewEvents.OpenServerSelection)
+            getLoginFlow(homeServerConnectionConfig, ServerType.Other)
         }
     }
 
@@ -225,16 +220,7 @@ class LoginViewModel @AssistedInject constructor(
     }
 
     private fun handleRegisterAction(action: LoginAction.RegisterAction) {
-        when (action) {
-            is LoginAction.CaptchaDone -> handleCaptchaDone(action)
-            is LoginAction.AcceptTerms -> handleAcceptTerms()
-            is LoginAction.RegisterDummy -> handleRegisterDummy()
-            is LoginAction.AddThreePid -> handleAddThreePid(action)
-            is LoginAction.SendAgainThreePid -> handleSendAgainThreePid()
-            is LoginAction.ValidateThreePid -> handleValidateThreePid(action)
-            is LoginAction.CheckIfEmailHasBeenValidated -> handleCheckIfEmailHasBeenValidated(action)
-            is LoginAction.StopEmailValidationCheck -> handleStopEmailValidationCheck()
-        }
+        // Registration is disabled in this build.
     }
 
     private fun handleCheckIfEmailHasBeenValidated(action: LoginAction.CheckIfEmailHasBeenValidated) {
@@ -417,33 +403,21 @@ class LoginViewModel @AssistedInject constructor(
     private fun handleUpdateSignMode(action: LoginAction.UpdateSignMode) {
         setState {
             copy(
-                    signMode = action.signMode
+                    signMode = SignMode.SignIn
             )
         }
 
-        when (action.signMode) {
-            SignMode.SignUp -> startRegistrationFlow()
-            SignMode.SignIn -> startAuthenticationFlow()
-            SignMode.SignInWithMatrixId -> _viewEvents.post(LoginViewEvents.OnSignModeSelected(SignMode.SignInWithMatrixId))
-            SignMode.Unknown -> Unit
-        }
+        startAuthenticationFlow()
     }
 
     private fun handleUpdateServerType(action: LoginAction.UpdateServerType) {
         setState {
             copy(
-                    serverType = action.serverType
+                    serverType = ServerType.MatrixOrg
             )
         }
 
-        when (action.serverType) {
-            ServerType.Unknown -> Unit /* Should not happen */
-            ServerType.MatrixOrg ->
-                // Request login flow here
-                handle(LoginAction.UpdateHomeServer(matrixOrgUrl))
-            ServerType.EMS,
-            ServerType.Other -> _viewEvents.post(LoginViewEvents.OnServerSelectionDone(action.serverType))
-        }
+        handle(LoginAction.UpdateHomeServer(matrixOrgUrl))
     }
 
     private fun handleInitWith(action: LoginAction.InitWith) {
@@ -559,10 +533,8 @@ class LoginViewModel @AssistedInject constructor(
 
     private fun handleLoginOrRegister(action: LoginAction.LoginOrRegister) = withState { state ->
         when (state.signMode) {
-            SignMode.Unknown -> error("Developer error, invalid sign mode")
-            SignMode.SignIn -> handleLogin(action)
-            SignMode.SignUp -> handleRegisterWith(action)
             SignMode.SignInWithMatrixId -> handleDirectLogin(action, null)
+            else -> handleLogin(action)
         }
     }
 
