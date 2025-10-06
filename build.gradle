@@ -26,6 +26,11 @@ buildscript {
         classpath libs.gradle.hiltPlugin
         classpath 'com.google.firebase:firebase-appdistribution-gradle:4.0.0'
         classpath 'com.google.gms:google-services:4.3.15'
+        classpath 'org.jlleitschuh.gradle:ktlint-gradle:11.3.2'
+        classpath 'io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.23.7'
+        classpath 'com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:1.9.24-1.0.20'
+        classpath 'com.autonomousapps:dependency-analysis-gradle-plugin:1.20.0'
+        classpath 'com.osacky.doctor:doctor-plugin:0.8.1'
         classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:4.0.0.2929'
         classpath 'com.google.android.gms:oss-licenses-plugin:0.10.6'
         classpath "com.likethesalad.android:stem-plugin:2.9.0"
@@ -39,19 +44,10 @@ buildscript {
     }
 }
 
-plugins {
-    // ktlint Plugin
-    id "org.jlleitschuh.gradle.ktlint" version "11.3.2"
-    // Detekt
-    id "io.gitlab.arturbosch.detekt" version "1.23.7"
-    // Ksp
-    id "com.google.devtools.ksp" version "1.9.24-1.0.20"
-
-    // Dependency Analysis
-    id 'com.autonomousapps.dependency-analysis' version "1.20.0"
-    // Gradle doctor
-    id "com.osacky.doctor" version "0.8.1"
-}
+// Plugin classpaths are provided above; apply plugins below using the legacy syntax to
+// avoid relying on the Gradle Plugin Portal resolution which is restricted in this build setup.
+apply plugin: 'com.autonomousapps.dependency-analysis'
+apply plugin: 'com.osacky.doctor'
 
 // https://github.com/jeremylong/DependencyCheck
 apply plugin: 'org.owasp.dependencycheck'
