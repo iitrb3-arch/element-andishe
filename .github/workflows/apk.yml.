@@ -1,9 +1,19 @@
-name: Build F-Droid Release APK
+name: Build Release APK (Fdroid arm64)
 
 on:
   workflow_dispatch:
   push:
-    branches: [ develop ]
+    branches:
+      - develop
+      - main
+
+concurrency:
+  group: apk-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  HS_URL: https://edu97.ir
+  GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx3072m -Dfile.encoding=UTF-8"
 
 jobs:
   build:
@@ -13,22 +23,36 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup JDK 17
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@v2
 
-      - name: Clean and build F-Droid release
+      - name: Set Gradle version
         run: |
-          ./gradlew clean :vector-app:assembleFdroidRelease \
-            -PminifyEnabled=true -PshrinkResources=true --no-daemon --stacktrace
+          sed -i 's|distributionUrl=.*|distributionUrl=https\://services.gradle.org/distributions/gradle-8.6-bin.zip|' gradle/wrapper/gradle-wrapper.properties
 
-      - name: Upload APK artifact
+      - name: Configure homeserver URL
+        run: |
+          mkdir -p vector-app/src/main/assets
+          echo '{ "defaultHomeserverUrl": "${{ env.HS_URL }}" }' > vector-app/src/main/assets/vector_config.json
+
+      - name: Make Gradle executable
+        run: chmod +x ./gradlew
+
+      - name: Build optimized release APK
+        run: ./gradlew clean :vector-app:assembleFdroidRelease -PminifyEnabled=true -PshrinkResources=true --no-daemon --stacktrace
+
+      - name: List built APKs
+        run: ls -lh vector-app/build/outputs/apk/**/release/
+
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: fdroid-release
-          path: vector-app/build/outputs/apk/fdroid/release/*.apk
+          name: elementx-fdroid-release
+          path: |
+            vector-app/build/outputs/apk/**/release/*.apk
