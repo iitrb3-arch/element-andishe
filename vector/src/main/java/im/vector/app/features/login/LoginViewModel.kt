@@ -73,7 +73,10 @@ class LoginViewModel @AssistedInject constructor(
 
     private fun getKnownCustomHomeServersUrls() {
         setState {
-            copy(knownCustomHomeServersUrls = homeServerHistoryService.getKnownServersUrls())
+            copy(
+                    knownCustomHomeServersUrls = homeServerHistoryService.getKnownServersUrls()
+                            .filter { it.ensureTrailingSlash().equals(matrixOrgUrl, ignoreCase = true) }
+            )
         }
     }
 
@@ -165,7 +168,9 @@ class LoginViewModel @AssistedInject constructor(
     }
 
     private fun rememberHomeServer(homeServerUrl: String) {
-        homeServerHistoryService.addHomeServerToHistory(homeServerUrl)
+        if (homeServerUrl.ensureTrailingSlash().equals(matrixOrgUrl, ignoreCase = true)) {
+            homeServerHistoryService.addHomeServerToHistory(homeServerUrl)
+        }
         getKnownCustomHomeServersUrls()
     }
 
@@ -750,7 +755,14 @@ class LoginViewModel @AssistedInject constructor(
     }
 
     private fun handleUpdateHomeserver(action: LoginAction.UpdateHomeServer) {
-        val homeServerConnectionConfig = homeServerConnectionConfigFactory.create(action.homeServerUrl)
+        val enforcedHomeServerUrl = matrixOrgUrl
+        val normalizedInput = action.homeServerUrl.ensureTrailingSlash()
+        if (!normalizedInput.equals(enforcedHomeServerUrl, ignoreCase = true)) {
+            _viewEvents.post(LoginViewEvents.Failure(Throwable("Only https://edu97.ir is supported")))
+            return
+        }
+
+        val homeServerConnectionConfig = homeServerConnectionConfigFactory.create(enforcedHomeServerUrl)
         if (homeServerConnectionConfig == null) {
             // This is invalid
             _viewEvents.post(LoginViewEvents.Failure(Throwable("Unable to create a HomeServerConnectionConfig")))
@@ -771,12 +783,10 @@ class LoginViewModel @AssistedInject constructor(
             setState {
                 copy(
                         asyncHomeServerLoginFlowRequest = Loading(),
-                        // If user has entered https://matrix.org, ensure that server type is ServerType.MatrixOrg
-                        // It is also useful to set the value again in the case of a certificate error on matrix.org
-                        serverType = if (homeServerConnectionConfig.homeServerUri.toString() == matrixOrgUrl) {
-                            ServerType.MatrixOrg
-                        } else {
-                            serverTypeOverride ?: serverType
+                        // Always normalise the server type to the enforced homeserver so the UI reflects the locked setup
+                        serverType = serverTypeOverride ?: when (serverType) {
+                            ServerType.Unknown -> ServerType.Other
+                            else -> serverType
                         }
                 )
             }
@@ -788,8 +798,7 @@ class LoginViewModel @AssistedInject constructor(
                 setState {
                     copy(
                             asyncHomeServerLoginFlowRequest = Uninitialized,
-                            // If we were trying to retrieve matrix.org login flow, also reset the serverType
-                            serverType = if (serverType == ServerType.MatrixOrg) ServerType.Unknown else serverType
+                            serverType = serverType
                     )
                 }
                 null
