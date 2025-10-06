@@ -109,11 +109,7 @@ class FtueAuthVariant(
     }
 
     private fun addFirstFragment() {
-        val splashFragment = when (vectorFeatures.isOnboardingSplashCarouselEnabled()) {
-            true -> FtueAuthSplashCarouselFragment::class.java
-            else -> FtueAuthSplashFragment::class.java
-        }
-        activity.addFragment(views.loginFragmentContainer, splashFragment)
+        activity.addFragment(views.loginFragmentContainer, FtueAuthSplashFragment::class.java)
     }
 
     private fun updateWithState(viewState: OnboardingViewState) {
@@ -217,14 +213,7 @@ class FtueAuthVariant(
             OnboardingViewEvents.OnChooseProfilePicture -> onChooseProfilePicture()
             OnboardingViewEvents.OnPersonalizationComplete -> onPersonalizationComplete()
             OnboardingViewEvents.OnBack -> activity.popBackstack()
-            OnboardingViewEvents.EditServerSelection -> {
-                activity.addFragmentToBackstack(
-                        views.loginFragmentContainer,
-                        FtueAuthCombinedServerSelectionFragment::class.java,
-                        option = commonOption,
-                        tag = FRAGMENT_EDIT_HOMESERVER_TAG
-                )
-            }
+            OnboardingViewEvents.EditServerSelection -> Unit
             OnboardingViewEvents.OnHomeserverEdited -> {
                 supportFragmentManager.popBackStack(
                         FRAGMENT_EDIT_HOMESERVER_TAG,

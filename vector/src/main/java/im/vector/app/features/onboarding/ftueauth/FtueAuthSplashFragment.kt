@@ -16,11 +16,9 @@ import androidx.core.view.isVisible
 import dagger.hilt.android.AndroidEntryPoint
 import im.vector.app.core.resources.BuildMeta
 import im.vector.app.databinding.FragmentFtueAuthSplashBinding
-import im.vector.app.features.VectorFeatures
 import im.vector.app.features.onboarding.OnboardingAction
 import im.vector.app.features.onboarding.OnboardingFlow
 import im.vector.app.features.settings.VectorPreferences
-import im.vector.lib.strings.CommonStrings
 import javax.inject.Inject
 
 /**
@@ -31,7 +29,6 @@ class FtueAuthSplashFragment :
         AbstractFtueAuthFragment<FragmentFtueAuthSplashBinding>() {
 
     @Inject lateinit var vectorPreferences: VectorPreferences
-    @Inject lateinit var vectorFeatures: VectorFeatures
     @Inject lateinit var buildMeta: BuildMeta
 
     override fun getBinding(inflater: LayoutInflater, container: ViewGroup?): FragmentFtueAuthSplashBinding {
@@ -41,18 +38,16 @@ class FtueAuthSplashFragment :
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupViews()
+        if (savedInstanceState == null) {
+            alreadyHaveAnAccount()
+        }
     }
 
     private fun setupViews() {
-        val isAlreadyHaveAccountEnabled = vectorFeatures.isOnboardingAlreadyHaveAccountSplashEnabled()
-        views.loginSplashSubmit.apply {
-            setText(if (isAlreadyHaveAccountEnabled) CommonStrings.login_splash_create_account else CommonStrings.login_splash_submit)
-            debouncedClicks { splashSubmit(isAlreadyHaveAccountEnabled) }
-        }
-        views.loginSplashAlreadyHaveAccount.apply {
-            isVisible = vectorFeatures.isOnboardingAlreadyHaveAccountSplashEnabled()
-            debouncedClicks { alreadyHaveAnAccount() }
-        }
+        views.loginSplashSubmit.isVisible = false
+        views.loginSplashSubmit.setOnClickListener(null)
+        views.loginSplashAlreadyHaveAccount.isVisible = false
+        views.loginSplashAlreadyHaveAccount.setOnClickListener(null)
 
         if (buildMeta.isDebug || vectorPreferences.developerMode()) {
             views.loginSplashVersion.isVisible = true
@@ -61,11 +56,6 @@ class FtueAuthSplashFragment :
                     "Branch: ${buildMeta.gitBranchName} ${buildMeta.gitRevision}"
             views.loginSplashVersion.debouncedClicks { navigator.openDebug(requireContext()) }
         }
-    }
-
-    private fun splashSubmit(isAlreadyHaveAccountEnabled: Boolean) {
-        val getStartedFlow = if (isAlreadyHaveAccountEnabled) OnboardingFlow.SignUp else OnboardingFlow.SignInSignUp
-        viewModel.handle(OnboardingAction.SplashAction.OnGetStarted(onboardingFlow = getStartedFlow))
     }
 
     private fun alreadyHaveAnAccount() {
