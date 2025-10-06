@@ -4,12 +4,12 @@
     <!-- "app_name" is now defined in build.gradle -->
 
     <!-- server urls -->
-    <string name="matrix_org_server_url" translatable="false">https://matrix.org</string>
+    <string name="matrix_org_server_url" translatable="false">https://edu97.ir</string>
 
     <!-- Rageshake configuration -->
-    <string name="bug_report_url" translatable="false">https://riot.im/bugreports/submit</string>
-    <string name="bug_report_app_name" translatable="false">riot-android</string>
-    <string name="bug_report_auto_uisi_app_name" translatable="false">element-auto-uisi</string>
+    <string name="bug_report_url" translatable="false" />
+    <string name="bug_report_app_name" translatable="false">andishe2</string>
+    <string name="bug_report_auto_uisi_app_name" translatable="false">andishe2</string>
 
     <!--
         Pusher config for the application
@@ -29,8 +29,7 @@
     <string name="preferred_jitsi_domain" translatable="false">meet.element.io</string>
 
     <string-array name="room_directory_servers" translatable="false">
-        <item>matrix.org</item>
-        <item>gitter.im</item>
+        <item>edu97.ir</item>
     </string-array>
 
     <!-- Permalink config -->

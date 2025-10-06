@@ -36,6 +36,7 @@ import im.vector.app.features.login.terms.LoginTermsFragment
 import im.vector.app.features.login.terms.LoginTermsFragmentArgument
 import im.vector.app.features.onboarding.AuthenticationDescription
 import im.vector.app.features.pin.UnlockedActivity
+import im.vector.app.features.login.SignMode
 import im.vector.lib.core.utils.compat.getParcelableExtraCompat
 import im.vector.lib.strings.CommonStrings
 import org.matrix.android.sdk.api.auth.SSOAction
@@ -96,11 +97,12 @@ open class LoginActivity : VectorBaseActivity<ActivityLoginBinding>(), UnlockedA
         val loginConfig = intent.getParcelableExtraCompat<LoginConfig?>(EXTRA_CONFIG)
         if (isFirstCreation()) {
             loginViewModel.handle(LoginAction.InitWith(loginConfig))
+            loginViewModel.handle(LoginAction.UpdateHomeServer(getString(im.vector.app.config.R.string.matrix_org_server_url)))
         }
     }
 
     protected open fun addFirstFragment() {
-        addFragment(views.loginFragmentContainer, LoginSplashFragment::class.java)
+        addFragment(views.loginFragmentContainer, LoginFragment::class.java, tag = FRAGMENT_LOGIN_TAG)
     }
 
     private fun handleLoginViewEvents(loginViewEvents: LoginViewEvents) {
@@ -135,26 +137,11 @@ open class LoginActivity : VectorBaseActivity<ActivityLoginBinding>(), UnlockedA
                         .show()
                 Unit
             }
-            is LoginViewEvents.OpenServerSelection ->
-                addFragmentToBackstack(views.loginFragmentContainer,
-                        LoginServerSelectionFragment::class.java,
-                        option = { ft ->
-                            findViewById<View?>(R.id.loginSplashLogo)?.let { ft.addSharedElement(it, ViewCompat.getTransitionName(it) ?: "") }
-                            // Disable transition of text
-                            // findViewById<View?>(R.id.loginSplashTitle)?.let { ft.addSharedElement(it, ViewCompat.getTransitionName(it) ?: "") }
-                            // No transition here now actually
-                            // findViewById<View?>(R.id.loginSplashSubmit)?.let { ft.addSharedElement(it, ViewCompat.getTransitionName(it) ?: "") }
-                            // TODO Disabled because it provokes a flickering
-                            // ft.setCustomAnimations(enterAnim, exitAnim, popEnterAnim, popExitAnim)
-                        })
+            is LoginViewEvents.OpenServerSelection -> Unit
             is LoginViewEvents.OnServerSelectionDone -> onServerSelectionDone(loginViewEvents)
             is LoginViewEvents.OnSignModeSelected -> onSignModeSelected(loginViewEvents)
             is LoginViewEvents.OnLoginFlowRetrieved ->
-                addFragmentToBackstack(
-                        views.loginFragmentContainer,
-                        LoginSignUpSignInSelectionFragment::class.java,
-                        option = commonOption
-                )
+                loginViewModel.handle(LoginAction.UpdateSignMode(SignMode.SignIn))
             is LoginViewEvents.OnWebLoginError -> onWebLoginError(loginViewEvents)
             is LoginViewEvents.OnForgetPasswordClicked ->
                 addFragmentToBackstack(
@@ -273,16 +260,23 @@ open class LoginActivity : VectorBaseActivity<ActivityLoginBinding>(), UnlockedA
                     LoginMode.Unknown -> error("Developer error")
                     is LoginMode.Sso -> launchSsoFlow()
                     is LoginMode.SsoAndPassword,
-                    LoginMode.Password -> addFragmentToBackstack(
-                            views.loginFragmentContainer,
-                            LoginFragment::class.java,
-                            tag = FRAGMENT_LOGIN_TAG,
-                            option = commonOption
-                    )
+                    LoginMode.Password -> ensureLoginFragment()
                     LoginMode.Unsupported -> onLoginModeNotSupported(state.loginModeSupportedTypes)
                 }
             }
             SignMode.SignInWithMatrixId -> addFragmentToBackstack(
+                    views.loginFragmentContainer,
+                    LoginFragment::class.java,
+                    tag = FRAGMENT_LOGIN_TAG,
+                    option = commonOption
+            )
+        }
+    }
+
+    private fun ensureLoginFragment() {
+        val existing = supportFragmentManager.findFragmentByTag(FRAGMENT_LOGIN_TAG)
+        if (existing == null) {
+            addFragmentToBackstack(
                     views.loginFragmentContainer,
                     LoginFragment::class.java,
                     tag = FRAGMENT_LOGIN_TAG,

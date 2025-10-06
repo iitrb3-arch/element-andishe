@@ -131,19 +131,14 @@ class LoginViewModel @AssistedInject constructor(
             loginConfig = null
         }
 
-        val configUrl = loginConfig?.homeServerUrl?.takeIf { it.isNotEmpty() }
-        if (configUrl != null) {
-            // Use config from uri
-            val homeServerConnectionConfig = homeServerConnectionConfigFactory.create(configUrl)
-            if (homeServerConnectionConfig == null) {
-                // Url is invalid, in this case, just use the regular flow
-                Timber.w("Url from config url was invalid: $configUrl")
-                _viewEvents.post(LoginViewEvents.OpenServerSelection)
-            } else {
-                getLoginFlow(homeServerConnectionConfig, ServerType.Other)
-            }
+        val targetUrl = (loginConfig?.homeServerUrl?.takeIf { it.isNotEmpty() }
+                ?: matrixOrgUrl).ensureTrailingSlash()
+        val homeServerConnectionConfig = homeServerConnectionConfigFactory.create(targetUrl)
+        if (homeServerConnectionConfig == null) {
+            Timber.w("Url from config url was invalid: $targetUrl")
+            _viewEvents.post(LoginViewEvents.Failure(Throwable("Unable to create a HomeServerConnectionConfig")))
         } else {
-            _viewEvents.post(LoginViewEvents.OpenServerSelection)
+            getLoginFlow(homeServerConnectionConfig, ServerType.Other)
         }
     }
 

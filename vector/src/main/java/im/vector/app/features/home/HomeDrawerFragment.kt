@@ -11,7 +11,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
@@ -22,16 +21,12 @@ import im.vector.app.core.extensions.observeK
 import im.vector.app.core.extensions.replaceChildFragment
 import im.vector.app.core.platform.VectorBaseFragment
 import im.vector.app.core.resources.BuildMeta
-import im.vector.app.core.utils.startSharePlainTextIntent
 import im.vector.app.databinding.FragmentHomeDrawerBinding
-import im.vector.app.features.analytics.plan.MobileScreen
-import im.vector.app.features.permalink.PermalinkFactory
+import im.vector.app.features.home.AvatarRenderer
 import im.vector.app.features.settings.VectorPreferences
 import im.vector.app.features.settings.VectorSettingsActivity
 import im.vector.app.features.spaces.SpaceListFragment
-import im.vector.app.features.usercode.UserCodeActivity
 import im.vector.app.features.workers.signout.SignOutUiWorker
-import im.vector.lib.strings.CommonStrings
 import org.matrix.android.sdk.api.session.Session
 import org.matrix.android.sdk.api.util.toMatrixItem
 import javax.inject.Inject
@@ -44,7 +39,6 @@ class HomeDrawerFragment :
     @Inject lateinit var vectorPreferences: VectorPreferences
     @Inject lateinit var avatarRenderer: AvatarRenderer
     @Inject lateinit var buildMeta: BuildMeta
-    @Inject lateinit var permalinkFactory: PermalinkFactory
 
     private lateinit var sharedActionViewModel: HomeSharedActionViewModel
 
@@ -84,32 +78,8 @@ class HomeDrawerFragment :
             SignOutUiWorker(requireActivity()).perform()
         }
 
-        views.homeDrawerQRCodeButton.debouncedClicks {
-            UserCodeActivity.newIntent(requireContext(), sharedActionViewModel.session.myUserId).let {
-                val options =
-                        ActivityOptionsCompat.makeSceneTransitionAnimation(
-                                requireActivity(),
-                                views.homeDrawerHeaderAvatarView,
-                                ViewCompat.getTransitionName(views.homeDrawerHeaderAvatarView) ?: ""
-                        )
-                startActivity(it, options.toBundle())
-            }
-        }
-
-        views.homeDrawerInviteFriendButton.debouncedClicks {
-            permalinkFactory.createPermalinkOfCurrentUser()?.let { permalink ->
-                analyticsTracker.screen(MobileScreen(screenName = MobileScreen.ScreenName.InviteFriends))
-                val text = getString(CommonStrings.invite_friends_text, permalink)
-
-                startSharePlainTextIntent(
-                        context = requireContext(),
-                        activityResultLauncher = null,
-                        chooserTitle = getString(CommonStrings.invite_friends),
-                        text = text,
-                        extraTitle = getString(CommonStrings.invite_friends_rich_title)
-                )
-            }
-        }
+        views.homeDrawerQRCodeButton.isVisible = false
+        views.homeDrawerInviteFriendButton.isVisible = false
 
         ViewCompat.setOnApplyWindowInsetsListener(view) { v, insets ->
             val systemBars = insets.getInsets(
