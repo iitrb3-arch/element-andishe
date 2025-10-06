@@ -1,22 +1,18 @@
-name: Build Android APK (Fdroid arm64)
+name: Build APK (Fdroid - Simple)
 
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
-      - develop
-
-env:
-  HS_URL: https://edu97.ir
-  GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx3072m -Dfile.encoding=UTF-8"
+    paths:
+      - 'vector-app/**'
+      - '.github/workflows/build-apk.yml'
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout project
         uses: actions/checkout@v4
 
       - name: Set up JDK 17
@@ -25,26 +21,20 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Make Gradle executable
-        run: chmod +x ./gradlew
+      - name: Install Android SDK
+        uses: android-actions/setup-android@v3
 
-      - name: Configure homeserver
+      - name: Build APK (Fdroid Release)
         run: |
-          mkdir -p vector-app/src/main/assets
-          echo '{ "defaultHomeserverUrl": "${{ env.HS_URL }}" }' > vector-app/src/main/assets/vector_config.json
-
-      - name: Build release APK (optimized)
-        run: |
-          ./gradlew clean :vector-app:assembleFdroidRelease \
-            -PminifyEnabled=true \
-            -PshrinkResources=true \
-            --no-daemon --stacktrace
+          chmod +x ./gradlew
+          ./gradlew :vector-app:assembleFdroidRelease --no-daemon --stacktrace
 
       - name: List built APKs
-        run: ls -lh vector-app/build/outputs/apk/**/release/
+        run: ls -R vector-app/build/outputs/apk || true
 
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: fdroid-release
-          path: vector-app/build/outputs/apk/**/release/*.apk
+          name: Andishe-Release-APK
+          path: |
+            vector-app/build/outputs/apk/fdroid/release/*.apk
